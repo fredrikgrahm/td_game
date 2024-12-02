@@ -23,18 +23,21 @@ class Game:
         self.BLACK = (0, 0, 0)
         self.GREY = (169, 169, 169)
         
-        # Fonts
+        
         self.font = pygame.font.SysFont('Arial', 24)
         
-        # Instantiate WaveManager
+        # Instantiate game elements
         self.wave_manager = WaveManager()
         self.scoreboard = Scoreboard()
+        self.game_state = GameState()
         
         # Variables
         self.selected_tower = [None]  # Use a list for mutability
         self.enemies = []
         self.towers = []
         self.coins_spent = 0
+        self.add_enemy_destroyed = self.scoreboard.add_enemy_destroyed
+
         # Define path rectangles for collision detection
         self.path_rects = [
             pygame.Rect(0, self.HEIGHT // 2 - 20, 150, 40),        # Horizontal path from left to (150, HEIGHT // 2)
@@ -63,10 +66,6 @@ class Game:
             (self.WIDTH - 50, self.HEIGHT - 100),
         ]
         
-        # Initialize game state
-        self.game_state = GameState()
-        
-        # Clock
         self.clock = pygame.time.Clock()
         
     def start_game(self):
@@ -75,7 +74,7 @@ class Game:
         self.towers.clear()
         self.wave_manager.reset()
         self.player_coins = 100
-        self.selected_tower[0] = None  # Reset the selected tower correctly
+        self.selected_tower[0] = None  
         self.player_health = 1
         self.shop.shop_open = False
 
@@ -87,7 +86,12 @@ class Game:
     def update_enemies(self):
         for enemy in self.enemies[:]:
             enemy.move(self.waypoints)
-            if enemy.waypoint_index >= len(self.waypoints):
+            if enemy.health <= 0:
+                enemy_type_name = enemy.__class__.__name__  # Get enemy type as string
+                self.scoreboard.add_enemy_destroyed(enemy_type_name)  # Update enemy_counts
+                self.player_coins += enemy.coin_reward
+                self.enemies.remove(enemy)
+            elif enemy.waypoint_index >= len(self.waypoints):
                 self.player_health -= 1
                 self.enemies.remove(enemy)
                 if self.player_health <= 0:
@@ -115,26 +119,28 @@ class Game:
                 hit, killed_enemy = tower.shoot(self.enemies, self.screen)
                 if killed_enemy:
                     self.player_coins += killed_enemy.coin_reward
+                    enemy_type_name = killed_enemy.__class__.__name__
+                    self.scoreboard.add_enemy_destroyed(enemy_type_name)
                     self.enemies.remove(killed_enemy)
                 tower.shoot_timer = 0
 
     def draw_game_elements(self):
-        # Draw the map
+      
         self.draw_map()
-        # Draw enemies
+        
         for enemy in self.enemies:
             enemy.draw(self.screen)
-        # Draw towers
+        
         for tower in self.towers:
             tower.draw(self.screen)
-        # Highlight selected tower
+        
         if self.selected_tower[0]:
             self.selected_tower[0].draw_highlight(self.screen)
-        # Draw shop
+        
         self.shop.draw_shop(self.screen)
-        # Draw wave messages
+        
         self.wave_manager.draw_wave_message(self.screen, self.font)
-        # Draw HUD
+        
         self.draw_hud()
         # Draw placement mode message
         if self.shop.placing_tower:
@@ -182,16 +188,16 @@ class Game:
 
                 # Set color based on validity
                 if invalid_position:
-                    color = (255, 0, 0)  # Red for invalid placement
+                    color = (255, 0, 0)  
                 else:
-                    color = (0, 255, 0)  # Green for valid placement
+                    color = (0, 255, 0)  
 
-                # Draw the tower and range at mouse position
+                
                 temp_tower.draw_transparent(self.screen, color)
 
     def show_message(self, text, duration=500):
         self.message = text
-        self.message_timer = pygame.time.get_ticks() + duration  # Duration in milliseconds
+        self.message_timer = pygame.time.get_ticks() + duration  
 
     def draw_message(self):
         if self.message and pygame.time.get_ticks() < self.message_timer:
@@ -212,7 +218,7 @@ class Game:
             self.player_coins, message = handle_events(
                 self.game_state, self.shop, self.towers, self.wave_manager,
                 self.enemies, self.player_coins, self.selected_tower, self.start_game,
-                self.towers, self.scoreboard  # Added scoreboard as a parameter
+                self.towers, self.scoreboard  
             )
             if message:
                 self.show_message(message)
@@ -230,10 +236,10 @@ class Game:
                 self.wave_manager.update(self.enemies)
                 self.update_enemies()
                 self.update_towers()
-                # Remove the incorrect method call
-                # Draw game elements
+               
+                
                 self.draw_game_elements()
-                # Draw the message on top of game elements
+                
                 self.draw_message()
                 # Check for game over
                 if self.player_health <= 0:
