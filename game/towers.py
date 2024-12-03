@@ -12,7 +12,11 @@ class Tower:
         self.upgrade_cost = 50
 
     def draw(self, screen):
-        pygame.draw.circle(screen, (0, 0, 255), (self.x, self.y), 20)  # Blue for LaserTower
+        image = pygame.image.load('assets/images/laser_tower_128x128.png')
+        image = pygame.transform.scale(image, (40, 40))  # Scale down the image
+        image.set_colorkey((255, 255, 255))  # Assuming the corners are white and should be transparent
+        screen.blit(image, (self.x - 20, self.y - 20))
+        # pygame.draw.circle(screen, (0, 0, 255), (self.x, self.y), 20)  # Blue for LaserTower
 
     def draw_highlight(self, screen):
         pygame.draw.circle(screen, (255, 255, 0), (self.x, self.y), 25, 2)
