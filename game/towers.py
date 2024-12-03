@@ -10,13 +10,15 @@ class Tower:
         self.range = 100
         self.level = 1
         self.upgrade_cost = 50
+        self.laser_tower_asset = pygame.image.load('assets/images/laser_tower_128x128.png')
+        self.laser_tower_asset = pygame.transform.scale(self.laser_tower_asset, (40, 40))  # Scale down the image
+        self.laser_tower_asset.set_colorkey((255, 255, 255))  # Assuming the corners are white and should be transparent
 
     def draw(self, screen):
-        image = pygame.image.load('assets/images/laser_tower_128x128.png')
-        image = pygame.transform.scale(image, (40, 40))  # Scale down the image
-        image.set_colorkey((255, 255, 255))  # Assuming the corners are white and should be transparent
-        screen.blit(image, (self.x - 20, self.y - 20))
+        screen.blit(self.laser_tower_asset, (self.x - 20, self.y - 20))
         # pygame.draw.circle(screen, (0, 0, 255), (self.x, self.y), 20)  # Blue for LaserTower
+
+#TODO make the draw_highlight method for the other towers aswell
 
     def draw_highlight(self, screen):
         pygame.draw.circle(screen, (255, 255, 0), (self.x, self.y), 25, 2)
@@ -28,7 +30,8 @@ class Tower:
     def draw_transparent(self, screen, color):
         # Create a transparent surface for the tower
         temp_surface = pygame.Surface((40, 40), pygame.SRCALPHA)
-        pygame.draw.circle(temp_surface, (*color, 128), (20, 20), 20)
+        temp_surface.blit(self.laser_tower_asset, (0, 0))
+        temp_surface.fill((*color, 128), special_flags=pygame.BLEND_RGBA_MULT)
         screen.blit(temp_surface, (self.x - 20, self.y - 20))
         # Draw the range circle
         pygame.draw.circle(screen, color, (self.x, self.y), self.range, 1)
