@@ -114,8 +114,8 @@ class FreezingTower(Tower):
 class FireTower(Tower):
     def __init__(self, x, y):
         super().__init__(x, y)
-        self.shoot_interval = 40  # FireTower shoots every 40 frames
-        self.burn_duration = 100  # Burn effect lasts for 100 frames
+        self.shoot_interval = 30  # FireTower shoots every 40 frames
+        self.burn_duration = 50  # Burn effect lasts for 100 frames
         self.burn_damage = 1  # Burn effect deals 1 damage per frame
         self.burn_dies = set()  # Set to track if enemy is hit by burn effect
 
@@ -123,13 +123,12 @@ class FireTower(Tower):
         for enemy in enemies:
             if self.in_range(enemy):
                 pygame.draw.line(screen, (255, 69, 0), (self.x, self.y), (enemy.x, enemy.y), 2)  # Orange laser line
-                enemy.take_damage(5)  # Initial hit damage
+                enemy.take_damage(1)
                 enemy.apply_burn(self.burn_duration, self.burn_damage)
-                # Enemy was hit
-                if enemy.health >= 0:
-                    return True, enemy
+                if enemy.health <= 0:
+                    return True, enemy  # Enemy was killed
                 else:
-                    return True, None
+                    return True, None   # Enemy was hit but not killed
         return False, None
 
     def draw(self, screen):
@@ -138,7 +137,7 @@ class FireTower(Tower):
 
     def draw_highlight(self, screen):
         pygame.draw.circle(screen, (255, 255, 0), (self.x, self.y), 25, 2)
-        pygame.draw.circle(screen, (0, 255, 0), (self.x, self.y), self.range, 1)  # Draw range indicator
+        pygame.draw.circle(screen, (0, 255, 0), (self.x, self.y), self.range, 1)
         font = pygame.font.SysFont('Arial', 16)
         level_text = font.render(f'Lvl {self.level}', True, (0, 0, 0))
         screen.blit(level_text, (self.x - 15, self.y - 20))
@@ -158,8 +157,8 @@ class FireTower(Tower):
 
 class Shop:
     def __init__(self, width, height, path_rects):
-        self.shop_open = False  # Ensure the shop starts closed
-        self.button_rect = pygame.Rect(10, height - 60, 100, 50)  # Shop button position and size
+        self.shop_open = False  
+        self.button_rect = pygame.Rect(10, height - 60, 100, 50) 
         self.tower_prices = {
             'LaserTower': 30,
             'FreezingTower': 50,
@@ -169,7 +168,7 @@ class Shop:
         self.placing_tower = False
         self.width = width
         self.height = height
-        self.path_rects = path_rects  # Store path rectangles for collision detection
+        self.path_rects = path_rects  
 
     def toggle_shop(self):
         self.shop_open = not self.shop_open
@@ -205,8 +204,8 @@ class Shop:
             # Collision detection with existing towers
             for tower in existing_towers:
                 distance = math.hypot(new_tower.x - tower.x, new_tower.y - tower.y)
-                if distance < 40:  # Towers have a radius of 20, so distance must be at least 40
-                    return player_coins, None, False  # Cannot place tower here
+                if distance < 40:  
+                    return player_coins, None, False  
 
             # Collision detection with path
             tower_rect = pygame.Rect(new_tower.x - 20, new_tower.y - 20, 40, 40)

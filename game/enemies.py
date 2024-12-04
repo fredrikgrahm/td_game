@@ -12,8 +12,9 @@ class Enemy:
         self.waypoint_index = 0
         self.frozen_timer = 0
         self.frozen = False
-        self.burn_timer = 0
+        self.burn_duration = 0
         self.burn_damage = 0
+        self.burn_delay = False  # Initialize burn delay
 
     def move(self, waypoints):
         if self.frozen:
@@ -36,9 +37,12 @@ class Enemy:
                 if abs(self.x - target_x) < self.speed and abs(self.y - target_y) < self.speed:
                     self.waypoint_index += 1
 
-        if self.burn_timer > 0:
-            self.burn_timer -= 1
-            self.take_damage(self.burn_damage)
+        if self.burn_duration > 0:
+            if not self.burn_delay:
+                self.take_damage(self.burn_damage)
+            else:
+                self.burn_delay = False  # Start burn damage next frame
+            self.burn_duration -= 1
 
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, (self.x, self.y, self.size, self.size))
@@ -70,8 +74,9 @@ class Enemy:
         self.frozen_timer = 0
 
     def apply_burn(self, duration, damage):
-        self.burn_timer = duration
+        self.burn_duration = duration
         self.burn_damage = damage
+        self.burn_delay = True  # Set delay to skip immediate damage
 
 
 class BasicEnemy(Enemy):
