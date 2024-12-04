@@ -11,14 +11,21 @@ class Tower:
         self.level = 1
         self.upgrade_cost = 50
         self.laser_tower_asset = pygame.image.load('assets/images/laser_tower_128x128.png')
-        self.laser_tower_asset = pygame.transform.scale(self.laser_tower_asset, (40, 40))  # Scale down the image
-        self.laser_tower_asset.set_colorkey((255, 255, 255))  # Assuming the corners are white and should be transparent
+        self.laser_tower_asset = pygame.transform.scale(self.laser_tower_asset, (40, 40))  
+        self.laser_tower_asset.set_colorkey((255, 255, 255))
+        self.freeze_tower_asset = pygame.image.load('assets/images/freeze_tower_128x128.png')
+        self.freeze_tower_asset = pygame.transform.scale(self.freeze_tower_asset, (40, 40)) 
+        self.freeze_tower_asset.set_colorkey((255, 255, 255))
+        self.fire_tower_asset = pygame.image.load('assets/images/fire_tower_128x128.png')
+        self.fire_tower_asset = pygame.transform.scale(self.fire_tower_asset, (40, 40)) 
+        self.fire_tower_asset.set_colorkey((255, 255, 255))  
+
 
     def draw(self, screen):
         screen.blit(self.laser_tower_asset, (self.x - 20, self.y - 20))
         # pygame.draw.circle(screen, (0, 0, 255), (self.x, self.y), 20)  # Blue for LaserTower
 
-#TODO make the draw_highlight method for the other towers aswell
+
 
     def draw_highlight(self, screen):
         pygame.draw.circle(screen, (255, 255, 0), (self.x, self.y), 25, 2)
@@ -71,6 +78,7 @@ class FreezingTower(Tower):
         self.shoot_interval = 50
         self.hit_enemies = set()  # Set to track enemies already hit
 
+
     def shoot(self, enemies, screen):
         for enemy in enemies:
             if self.in_range(enemy) and enemy.id not in self.hit_enemies:
@@ -87,15 +95,17 @@ class FreezingTower(Tower):
         return False, None
 
     def draw(self, screen):
-        pygame.draw.circle(screen, (0, 255, 255), (self.x, self.y), 20)  # Cyan for FreezingTower
+        screen.blit(self.freeze_tower_asset, (self.x - 20, self.y - 20))
 
 
-    def draw_highlight(self, screen):
-        pygame.draw.circle(screen, (255, 255, 0), (self.x, self.y), 25, 2)
-        pygame.draw.circle(screen, (0, 255, 0), (self.x, self.y), self.range, 1)  # Draw range indicator
-        font = pygame.font.SysFont('Arial', 16)
-        level_text = font.render(f'Lvl {self.level}', True, (0, 0, 0))
-        screen.blit(level_text, (self.x - 15, self.y - 20))
+    def draw_transparent(self, screen, color):
+
+        temp_surface = pygame.Surface((40, 40), pygame.SRCALPHA)
+        temp_surface.blit(self.freeze_tower_asset, (0, 0))
+        temp_surface.fill((*color, 128), special_flags=pygame.BLEND_RGBA_MULT)
+        screen.blit(temp_surface, (self.x - 20, self.y - 20))
+
+        pygame.draw.circle(screen, color, (self.x, self.y), self.range, 1)
 
     def upgrade(self):
         super().upgrade()
@@ -123,7 +133,7 @@ class FireTower(Tower):
         return False, None
 
     def draw(self, screen):
-        pygame.draw.circle(screen, (255, 69, 0), (self.x, self.y), 20)  # Draw the FireTower in orange
+        screen.blit(self.fire_tower_asset, (self.x - 20, self.y - 20))
 
 
     def draw_highlight(self, screen):
@@ -132,6 +142,15 @@ class FireTower(Tower):
         font = pygame.font.SysFont('Arial', 16)
         level_text = font.render(f'Lvl {self.level}', True, (0, 0, 0))
         screen.blit(level_text, (self.x - 15, self.y - 20))
+
+    def draw_transparent(self, screen, color):
+        # Create a transparent surface for the tower
+        temp_surface = pygame.Surface((40, 40), pygame.SRCALPHA)
+        temp_surface.blit(self.fire_tower_asset, (0, 0))
+        temp_surface.fill((*color, 128), special_flags=pygame.BLEND_RGBA_MULT)
+        screen.blit(temp_surface, (self.x - 20, self.y - 20))
+        # Draw the range circle
+        pygame.draw.circle(screen, color, (self.x, self.y), self.range, 1)    
 
     def upgrade(self):
         super().upgrade()
