@@ -1,12 +1,14 @@
 import pygame
 import sys
 import math
+import json
 from game.enemies import Enemy
 from game.towers import Tower, FreezingTower, FireTower, Shop
 from game.wave_manager import WaveManager
 from game.scoreboard import Scoreboard
 from game.game_state import GameState
 from game.event_handler import handle_events
+from game.path_rect import generate_path_rects
 
 class Game:
     def __init__(self):
@@ -38,34 +40,43 @@ class Game:
         self.coins_spent = 0
         self.add_enemy_destroyed = self.scoreboard.add_enemy_destroyed
 
-        # Define path rectangles for collision detection
-        self.path_rects = [
-            pygame.Rect(0, self.HEIGHT // 2 - 20, 150, 40),        # Horizontal path from left to (150, HEIGHT // 2)
-            pygame.Rect(150 - 20, 100, 40, self.HEIGHT // 2 - 100), # Vertical path up to (150, 100)
-            pygame.Rect(150, 100 - 20, 300, 40),                   # Horizontal path to the right to (450, 100)
-            pygame.Rect(450 - 20, 100, 40, 300),                   # Vertical path down to (450, 400)
-            pygame.Rect(250, 400 - 20, 200, 40),                   # Horizontal path to the left to (250, 400)
-            pygame.Rect(250 - 20, 400, 40, self.HEIGHT - 500),     # Vertical path down to (250, HEIGHT - 100)
-            pygame.Rect(250, self.HEIGHT - 100 - 20, self.WIDTH - 300, 40),  # Final horizontal path to the right
-        ]
-        self.shop = Shop(self.WIDTH, self.HEIGHT, self.path_rects)
         self.player_coins = 100
         self.player_health = 3
         self.message = ''  # Current message to display
         self.message_timer = 0  # Timer for message duration
+
+        # Define path rectangles for collision detection
+        # self.path_rects = [
+        #     pygame.Rect(0, self.HEIGHT // 2 - 20, 150, 40),        # Horizontal path from left to (150, HEIGHT // 2)
+        #     pygame.Rect(150 - 20, 100, 40, self.HEIGHT // 2 - 100), # Vertical path up to (150, 100)
+        #     pygame.Rect(150, 100 - 20, 300, 40),                   # Horizontal path to the right to (450, 100)
+        #     pygame.Rect(450 - 20, 100, 40, 300),                   # Vertical path down to (450, 400)
+        #     pygame.Rect(250, 400 - 20, 200, 40),                   # Horizontal path to the left to (250, 400)
+        #     pygame.Rect(250 - 20, 400, 40, self.HEIGHT - 500),     # Vertical path down to (250, HEIGHT - 100)
+        #     pygame.Rect(250, self.HEIGHT - 100 - 20, self.WIDTH - 300, 40),  # Final horizontal path to the right
+        # ]
+
+
+        # # Define waypoints
+        # self.waypoints = [
+        #     (0, self.HEIGHT // 2),
+        #     (150, self.HEIGHT // 2),
+        #     (150, 100),
+        #     (450, 100),
+        #     (450, 400),
+        #     (250, 400),
+        #     (250, self.HEIGHT - 100),
+        #     (self.WIDTH - 50, self.HEIGHT - 100),
+        # ]
         
-        # Define waypoints
-        self.waypoints = [
-            (0, self.HEIGHT // 2),
-            (150, self.HEIGHT // 2),
-            (150, 100),
-            (450, 100),
-            (450, 400),
-            (250, 400),
-            (250, self.HEIGHT - 100),
-            (self.WIDTH - 50, self.HEIGHT - 100),
-        ]
+        # New waypoints loaded from file
+        with open('waypoints.json', 'r') as f:
+            self.waypoints = json.load(f)
+
+        self.path_rects = generate_path_rects(self.waypoints, 40)
         
+        self.shop = Shop(self.WIDTH, self.HEIGHT, self.path_rects)     
+            
         self.clock = pygame.time.Clock()
         
     def start_game(self):
