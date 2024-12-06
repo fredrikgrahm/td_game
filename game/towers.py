@@ -156,7 +156,7 @@ class FireTower(Tower):
         # Additional upgrade effects if any
 
 class Shop:
-    def __init__(self, width, height, path_rects):
+    def __init__(self, width, height, path_polygons):
         self.shop_open = False  
         self.button_rect = pygame.Rect(10, height - 60, 100, 50) 
         self.tower_prices = {
@@ -168,7 +168,7 @@ class Shop:
         self.placing_tower = False
         self.width = width
         self.height = height
-        self.path_rects = path_rects  
+        self.path_polygons = path_polygons  
 
     def toggle_shop(self):
         self.shop_open = not self.shop_open
@@ -208,10 +208,10 @@ class Shop:
                     return player_coins, None, False  
 
             # Collision detection with path
-            tower_rect = pygame.Rect(new_tower.x - 20, new_tower.y - 20, 40, 40)
-            for path_rect in self.path_rects:
-                if tower_rect.colliderect(path_rect):
-                    return player_coins, None, False  # Cannot place tower on path
+            tower_point = (x, y)
+            for polygon in self.path_polygons:
+                if point_in_polygon(tower_point, polygon):
+                    return player_coins, None, False
 
             # Proceed to place the tower
             player_coins -= self.tower_prices[self.selected_tower]
@@ -242,3 +242,21 @@ class Shop:
             screen.blit(laser_text, (panel_x + 10, panel_y + 10))
             screen.blit(freezing_text, (panel_x + 10, panel_y + 40))
             screen.blit(fire_text, (panel_x + 10, panel_y + 70))
+
+def point_in_polygon(point, polygon):
+    # Same function as in main.py or import it if possible
+    x, y = point
+    num = len(polygon)
+    inside = False
+    p1x, p1y = polygon[0]
+    for i in range(num + 1):
+        p2x, p2y = polygon[i % num]
+        if y > min(p1y, p2y):
+            if y <= max(p1y, p2y):
+                if x <= max(p1x, p2x):
+                    if p1y != p2y:
+                        xinters = (y - p1y) * (p2x - p1x) / (p2y - p1y + 1e-10) + p1x
+                        if x <= xinters:
+                            inside = not inside
+        p1x, p1y = p2x, p2y
+    return inside

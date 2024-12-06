@@ -1,4 +1,5 @@
 import pygame
+import math
 
 class Enemy:
     _id_counter = 0  # Class variable to generate unique IDs
@@ -21,27 +22,32 @@ class Enemy:
             self.frozen_timer -= 1
             if self.frozen_timer <= 0:
                 self.unfreeze()
-        else:
-            if self.waypoint_index < len(waypoints):
-                target_x, target_y = waypoints[self.waypoint_index]
-                if self.x < target_x:
-                    self.x += self.speed
-                elif self.x > target_x:
-                    self.x -= self.speed
-                if self.y < target_y:
-                    self.y += self.speed
-                elif self.y > target_y:
-                    self.y -= self.speed
+            return
 
-                # Check if the enemy has reached the current waypoint
-                if abs(self.x - target_x) < self.speed and abs(self.y - target_y) < self.speed:
-                    self.waypoint_index += 1
+        if self.waypoint_index < len(waypoints):
+            target_x, target_y = waypoints[self.waypoint_index]
+            dx = target_x - self.x
+            dy = target_y - self.y
+            distance = math.hypot(dx, dy)
 
+            if distance <= self.speed:
+                # Reached waypoint, move to next one
+                self.x = target_x
+                self.y = target_y
+                self.waypoint_index += 1
+            else:
+                # Move towards waypoint
+                move_x = (dx / distance) * self.speed
+                move_y = (dy / distance) * self.speed
+                self.x += move_x
+                self.y += move_y
+
+        # Handle burn effect
         if self.burn_duration > 0:
             if not self.burn_delay:
                 self.take_damage(self.burn_damage)
             else:
-                self.burn_delay = False  # Start burn damage next frame
+                self.burn_delay = False
             self.burn_duration -= 1
 
     def draw(self, screen):

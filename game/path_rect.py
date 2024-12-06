@@ -28,3 +28,36 @@ def create_rect_between_points(start_pos, end_pos, path_width):
     rotated_rect = rotated_surf.get_rect(center=rect.center)
 
     return rotated_rect
+
+def generate_path_polygons(waypoints, path_width):
+    polygons = []
+    half_width = path_width / 2
+
+    for i in range(len(waypoints) - 1):
+        start = waypoints[i]
+        end = waypoints[i + 1]
+
+        dx = end[0] - start[0]
+        dy = end[1] - start[1]
+        length = math.hypot(dx, dy)
+
+        if length == 0:
+            continue  # Avoid division by zero
+
+        # Normalize direction vector
+        nx = dx / length
+        ny = dy / length
+
+        # Perpendicular vector
+        px = -ny
+        py = nx
+
+        # Calculate corners of the polygon
+        corner1 = (start[0] + px * half_width, start[1] + py * half_width)
+        corner2 = (start[0] - px * half_width, start[1] - py * half_width)
+        corner3 = (end[0] - px * half_width, end[1] - py * half_width)
+        corner4 = (end[0] + px * half_width, end[1] + py * half_width)
+
+        polygons.append([corner1, corner2, corner3, corner4])
+
+    return polygons

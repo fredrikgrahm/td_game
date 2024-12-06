@@ -1,5 +1,6 @@
 import pygame
 import json
+from game.path_rect import generate_path_polygons  # Import the function
 
 def main():
     pygame.init()
@@ -42,11 +43,13 @@ def main():
                     pos = pygame.mouse.get_pos()
                     waypoints.append(pos)
 
-        # Draw waypoints and paths
-        for i, point in enumerate(waypoints):
+        # Draw waypoints and path
+        if len(waypoints) > 1:
+            path_polygons = generate_path_polygons(waypoints, 40)
+            for polygon in path_polygons:
+                pygame.draw.polygon(screen, GREY, polygon)
+        for point in waypoints:
             pygame.draw.circle(screen, RED, point, 5)
-            if i > 0:
-                pygame.draw.line(screen, BLACK, waypoints[i - 1], point, 2)
 
         # Instructions
         instructions = [

@@ -3,11 +3,13 @@ import random
 from game.enemies import BasicEnemy, FastEnemy, TankEnemy, BossEnemy
 
 class WaveManager:
-    def __init__(self):
+    def __init__(self, waypoints):
         self.total_waves = 10
         self.enemy_types = [BasicEnemy, FastEnemy, TankEnemy]
         self.reset()
         self.enemies_spawned_in_wave = 0  # Initialize counter
+        self.waypoints = waypoints
+        self.spawn_point = self.waypoints[0]
 
     def reset(self):
         self.current_wave = 0
@@ -59,7 +61,7 @@ class WaveManager:
         if self.wave_in_progress and self.enemies_to_spawn > 0:
             if current_time >= self.enemy_spawn_timer:
                 EnemyType = self.get_enemy_type()
-                enemy = EnemyType(0, 300)  # Position new enemies; adjust as needed
+                enemy = EnemyType(self.spawn_point[0], self.spawn_point[1])  # Position new enemies at spawn point
                 enemies_list.append(enemy)
                 self.enemies_to_spawn -= 1
                 self.enemies_spawned_in_wave += 1  # Increment counter

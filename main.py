@@ -8,7 +8,7 @@ from game.wave_manager import WaveManager
 from game.scoreboard import Scoreboard
 from game.game_state import GameState
 from game.event_handler import handle_events
-from game.path_rect import generate_path_rects
+from game.path_rect import generate_path_polygons  # Use polygons instead of rects
 
 class Game:
     def __init__(self):
@@ -25,15 +25,15 @@ class Game:
         self.BLACK = (0, 0, 0)
         self.GREY = (169, 169, 169)
         
-        
         self.font = pygame.font.SysFont('Arial', 24)
         
         # Instantiate game elements
-        self.wave_manager = WaveManager()
+        # Do not instantiate WaveManager here
+        # self.wave_manager = WaveManager()
         self.scoreboard = Scoreboard()
         self.game_state = GameState()
         
-        # Variables
+        
         self.selected_tower = [None]  # Use a list for mutability
         self.enemies = []
         self.towers = []
@@ -73,10 +73,10 @@ class Game:
         with open('waypoints.json', 'r') as f:
             self.waypoints = json.load(f)
 
-        self.path_rects = generate_path_rects(self.waypoints, 40)
+        self.path_polygons = generate_path_polygons(self.waypoints, 40)
+        self.shop = Shop(self.WIDTH, self.HEIGHT, self.path_polygons)
+        self.wave_manager = WaveManager(self.waypoints)
         
-        self.shop = Shop(self.WIDTH, self.HEIGHT, self.path_rects)     
-            
         self.clock = pygame.time.Clock()
         
     def start_game(self):
@@ -90,9 +90,9 @@ class Game:
         self.shop.shop_open = False
 
     def draw_map(self):
-        # Draw path using self.path_rects
-        for rect in self.path_rects:
-            pygame.draw.rect(self.screen, self.GREY, rect)
+        # Draw path using polygons
+        for polygon in self.path_polygons:
+            pygame.draw.polygon(self.screen, self.GREY, polygon)
 
     def update_enemies(self):
         for enemy in self.enemies[:]:
@@ -191,9 +191,9 @@ class Game:
                         break
 
                 # Collision with paths
-                tower_rect = pygame.Rect(temp_tower.x - 20, temp_tower.y - 20, 40, 40)
-                for path_rect in self.path_rects:
-                    if tower_rect.colliderect(path_rect):
+                tower_point = (temp_tower.x, temp_tower.y)
+                for polygon in self.path_polygons:
+                    if point_in_polygon(tower_point, polygon):
                         invalid_position = True
                         break
 
@@ -278,6 +278,24 @@ class Game:
         pygame.quit()
         sys.exit()
 
+def point_in_polygon(point, polygon):
+    x, y = point
+    num = len(polygon)
+    inside = False
+    p1x, p1y = polygon[0]
+    for i in range(num + 1):
+        p2x, p2y = polygon[i % num]
+        if y > min(p1y, p2y):
+            if y <= max(p1y, p2y):
+                if x <= max(p1x, p2x):
+                    if p1y != p2y:
+                        xinters = (y - p1y) * (p2x - p1x) / (p2y - p1y + 1e-10) + p1x
+                        if x <= xinters:
+                            inside = not inside
+        p1x, p1y = p2x, p2y
+    return inside
+
 if __name__ == "__main__":
     game = Game()
     game.game_loop()
+
