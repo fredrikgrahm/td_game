@@ -155,19 +155,19 @@ class Game:
         self.draw_hud()
         # Draw placement mode message
         if self.shop.placing_tower:
-            placing_text = self.font.render(
-                'Placing Tower... Left click to Confirm, press ESC to cancel',
-                True, (255, 0, 0)
-            )
-            self.screen.blit(
-                placing_text, 
-                (self.WIDTH // 2 - placing_text.get_width() // 2, 10)
-            )
+            # placing_text = self.font.render(
+            #     'Placing Tower... Left click to Confirm, press ESC to cancel',
+            #     True, (255, 0, 0)
+            # )
+            # self.screen.blit(
+            #     placing_text, 
+            #     (self.WIDTH // 2 - placing_text.get_width() // 2, 10)
+            # )
             
             # Get mouse position
             mouse_x, mouse_y = pygame.mouse.get_pos()
             
-            # Determine the tower class based on selected tower type
+
             tower_class = None
             if self.shop.selected_tower == 'LaserTower':
                 tower_class = Tower

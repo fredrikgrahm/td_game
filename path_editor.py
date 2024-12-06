@@ -8,17 +8,30 @@ def main():
     pygame.display.set_caption("Path Editor")
 
     WHITE = (255, 255, 255)
+    GREY = (200, 200, 200)
     BLACK = (0, 0, 0)
     RED = (255, 0, 0)
 
     font = pygame.font.SysFont('Arial', 24)
+
+    # Define the size of the squares
+    SQUARE_SIZE = 50
+
+    background = pygame.Surface((WIDTH, HEIGHT))
+    background.fill(WHITE)
+    # Create a background pattern of squares
+    for x in range(0, WIDTH, SQUARE_SIZE):
+        for y in range(0, HEIGHT, SQUARE_SIZE):
+            rect = pygame.Rect(x, y, SQUARE_SIZE, SQUARE_SIZE)
+            pygame.draw.rect(background, WHITE, rect)
+            pygame.draw.rect(background, GREY, rect, 1)
 
     waypoints = []
     running = True
     clock = pygame.time.Clock()
 
     while running:
-        screen.fill(WHITE)
+        screen.blit(background, (0, 0))
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
