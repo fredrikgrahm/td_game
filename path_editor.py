@@ -16,7 +16,7 @@ def main():
     font = pygame.font.SysFont('Arial', 24)
 
     # Define the size of the squares
-    SQUARE_SIZE = 50
+    SQUARE_SIZE = 40
 
     background = pygame.Surface((WIDTH, HEIGHT))
     background.fill(WHITE)
@@ -38,10 +38,14 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  # Left click
-                    pos = pygame.mouse.get_pos()
+            elif event.type == pygame.MOUSEBUTTONDOWN: 
+                if event.button == 1:  
+                    pos = pygame.mouse.get_pos() #add waypoints
                     waypoints.append(pos)
+                else:
+                    event.button == 3
+                    if len(waypoints) > 0: #remove latest waypoint
+                        waypoints.pop()    
 
         # Draw waypoints and path
         if len(waypoints) > 1:
@@ -54,6 +58,7 @@ def main():
         # Instructions
         instructions = [
             "Left-click to add waypoints",
+            "Right-click to remove waypoints",
             "Press 'S' to save waypoints",
             "Press 'C' to clear waypoints",
             "Close the window when done"
